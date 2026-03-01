@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLIXHUB — Free Movies & Web Series</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --pink: #e8007a;
+    --purple: #6b21a8;
+    --cyan: #00c8e0;
+    --green: #00e888;
+    --bg: #070714;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+    color: #fff;
+  }
+
+  /* ── BACKGROUND ── */
+  .bg-canvas {
+    position: fixed; inset: 0; z-index: 0;
+    background:
+      radial-gradient(ellipse at 15% 20%, #1a0533 0%, transparent 50%),
+      radial-gradient(ellipse at 85% 80%, #001a2e 0%, transparent 50%),
+      radial-gradient(ellipse at 50% 50%, #0d0020 0%, var(--bg) 70%);
+  }
+
+  /* Aurora */
+  .aurora { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+  .ab {
+    position: absolute; border-radius: 50%;
+    filter: blur(130px); opacity: 0;
+    animation: auroraPulse var(--dur,18s) ease-in-out infinite;
+    animation-delay: var(--delay,0s);
+  }
+  .ab1 { width:680px; height:680px; background:#6b21a8; top:-200px; left:-130px; --dur:20s; --delay:0s; }
+  .ab2 { width:540px; height:540px; background:#c4006b; bottom:-130px; right:-110px; --dur:24s; --delay:5s; }
+  .ab3 { width:440px; height:440px; background:#005c6b; top:25%; left:55%; --dur:17s; --delay:9s; }
+  .ab4 { width:360px; height:360px; background:#1a0066; top:50%; left:10%; --dur:22s; --delay:3s; }
+  @keyframes auroraPulse {
+    0%   { opacity:0;    transform:scale(0.92) translate(0,0); }
+    35%  { opacity:0.22; transform:scale(1.07) translate(25px,18px); }
+    65%  { opacity:0.27; transform:scale(0.96) translate(-18px,28px); }
+    100% { opacity:0;    transform:scale(0.92) translate(0,0); }
+  }
+
+  /* Grid */
+  .grid {
+    position:fixed; inset:0; z-index:0;
+    background-image:
+      linear-gradient(rgba(0,200,224,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,224,0.025) 1px, transparent 1px);
+    background-size:72px 72px;
+    animation: gridDrift 30s linear infinite;
+  }
+  @keyframes gridDrift { from{background-position:0 0} to{background-position:72px 72px} }
+
+  /* Stars */
+  .stars { position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .star {
+    position:absolute; background:#fff; border-radius:50%;
+    animation:starTwinkle var(--d,4s) ease-in-out infinite alternate;
+    animation-delay:var(--dd,0s);
+  }
+  @keyframes starTwinkle { from{opacity:0.05;} to{opacity:0.55;} }
+
+  /* Shooting stars */
+  .shoot {
+    position:fixed; z-index:0; pointer-events:none;
+    top:0; left:0; width:100%; height:100%; overflow:hidden;
+  }
+  .shoot-star {
+    position:absolute;
+    height:1.5px;
+    background:linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+    animation: shootAnim var(--dur,5s) ease-in-out infinite;
+    animation-delay: var(--delay,0s);
+    opacity:0;
+    transform-origin: left center;
+  }
+  @keyframes shootAnim {
+    0%   { opacity:0; transform: translateX(-200px) translateY(0) rotate(-30deg); }
+    5%   { opacity:0.8; }
+    30%  { opacity:0; transform: translateX(600px) translateY(250px) rotate(-30deg); }
+    100% { opacity:0; }
+  }
+
+  /* Floating particles */
+  .particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .particle {
+    position:absolute; border-radius:50%;
+    animation: rise var(--dur,15s) linear infinite;
+    animation-delay:var(--delay,0s); opacity:0;
+  }
+  @keyframes rise {
+    0%   { transform:translateY(100vh) scale(0); opacity:0; }
+    6%   { opacity:0.5; }
+    94%  { opacity:0.35; }
+    100% { transform:translateY(-80px) scale(1.3); opacity:0; }
+  }
+
+  /* Glitch lines */
+  .glitch-lines { position:fixed; inset:0; z-index:0; pointer-events:none; }
+  .glitch-line {
+    position:absolute; left:0; right:0; height:1px;
+    background:linear-gradient(90deg, transparent, rgba(0,200,224,0.15), transparent);
+    animation: glitchScan var(--dur,8s) ease-in-out infinite;
+    animation-delay:var(--delay,0s); opacity:0;
+  }
+  @keyframes glitchScan {
+    0%,90%,100% { opacity:0; transform:translateY(0); }
+    45% { opacity:1; transform:translateY(var(--travel, 200px)); }
+  }
+
+  /* ── LAYOUT ── */
+  .page {
+    position:relative; z-index:1;
+    max-width:800px; margin:0 auto;
+    padding:52px 22px 80px;
+    display:flex; flex-direction:column; align-items:center;
+  }
+
+  /* ── LOGO ── */
+  .logo-section {
+    text-align:center; margin-bottom:6px;
+    animation:enterDown 0.9s cubic-bezier(.175,.885,.32,1.275) both;
+  }
+  @keyframes enterDown {
+    from{opacity:0;transform:translateY(-36px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  .logo-wrap { position:relative; display:inline-block; }
+
+  /* Animated underline glow */
+  .logo-wrap::after {
+    content:'';
+    position:absolute;
+    bottom:-8px; left:10%; right:10%; height:2px;
+    background:linear-gradient(90deg, transparent, var(--cyan), var(--pink), transparent);
+    background-size:200% 100%;
+    animation:gradShift 6s ease infinite;
+    border-radius:2px;
+    filter:blur(1px);
+  }
+
+  .logo {
+    font-family:'Bebas Neue',cursive;
+    font-size:clamp(72px,15vw,120px);
+    letter-spacing:10px; line-height:1;
+    background:linear-gradient(130deg,#ffffff 0%,var(--cyan) 35%,#ffffff 55%,var(--pink) 90%);
+    background-size:250% 250%;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    animation:gradShift 10s ease infinite;
+    filter:drop-shadow(0 0 40px rgba(0,200,224,0.3));
+  }
+  @keyframes gradShift {
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+
+  /* Floating badge on logo */
+  .logo-badge {
+    position:absolute;
+    top:-10px; right:-28px;
+    font-family:'Orbitron',sans-serif;
+    font-size:8px; font-weight:800; letter-spacing:1px;
+    padding:3px 8px; border-radius:100px;
+    background:linear-gradient(135deg,var(--pink),var(--purple));
+    color:#fff; text-transform:uppercase;
+    animation:badgeBounce 2.5s ease-in-out infinite;
+    box-shadow:0 4px 14px rgba(232,0,122,0.4);
+  }
+  @keyframes badgeBounce {
+    0%,100%{transform:translateY(0) rotate(-3deg);}
+    50%{transform:translateY(-5px) rotate(3deg);}
+  }
+
+  .tagline {
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(9px,1.7vw,11px); letter-spacing:5px; text-transform:uppercase;
+    color:rgba(255,255,255,0.32); margin-top:14px;
+    animation:fadeUp 1s 0.3s both;
+  }
+  .desc {
+    font-size:clamp(13px,1.9vw,15px); color:rgba(255,255,255,0.5);
+    text-align:center; line-height:1.75; margin-top:10px; max-width:500px;
+    animation:fadeUp 1s 0.5s both;
+  }
+  @keyframes fadeUp {
+    from{opacity:0;transform:translateY(20px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  /* ── MARQUEE ── */
+  .marquee-wrap {
+    width:100%; overflow:hidden; margin:32px 0 24px;
+    animation:fadeUp 1s 0.6s both; position:relative;
+  }
+  .marquee-wrap::before,.marquee-wrap::after {
+    content:''; position:absolute; top:0; bottom:0;
+    width:72px; z-index:2; pointer-events:none;
+  }
+  .marquee-wrap::before{left:0;background:linear-gradient(to right,var(--bg),transparent);}
+  .marquee-wrap::after{right:0;background:linear-gradient(to left,var(--bg),transparent);}
+  .marquee-inner {
+    display:flex; width:max-content;
+    animation:marquee 26s linear infinite;
+  }
+  .marquee-inner span {
+    font-family:'Orbitron',sans-serif; font-size:11px; font-weight:600;
+    letter-spacing:4px; text-transform:uppercase;
+    padding:0 38px; white-space:nowrap; color:rgba(0,200,224,0.45);
+  }
+  .marquee-inner span.h{color:rgba(232,0,122,0.6);}
+  @keyframes marquee{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+
+  /* ── SLOGAN ── */
+  .slogan {
+    text-align:center; margin-bottom:30px;
+    animation:fadeUp 1s 0.7s both;
+  }
+  .slogan p {
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(11px,2vw,13px); letter-spacing:1.5px;
+    font-weight:600; color:rgba(255,255,255,0.4);
+  }
+  .slogan .hl {
+    background:linear-gradient(90deg,var(--pink) 0%,var(--cyan) 50%,var(--green) 100%);
+    background-size:200% 100%;
+    -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+    animation:gradShift 7s ease infinite; font-weight:800;
+  }
+
+  /* ── CARD ── */
+  .card-wrap { width:100%; animation:fadeUp 1s 0.85s both; }
+
+  .card {
+    background:rgba(10,7,24,0.78); border-radius:18px; overflow:hidden;
+    border:1px solid rgba(255,255,255,0.065); backdrop-filter:blur(28px);
+    box-shadow:0 24px 70px rgba(0,0,0,0.55), 0 0 0 1px rgba(0,200,224,0.05);
+    transition:box-shadow 0.5s, transform 0.5s;
+    position:relative;
+  }
+  /* Animated corner accents */
+  .card::before {
+    content:'';
+    position:absolute; top:0; left:0; right:0; height:2px; z-index:2;
+    background:linear-gradient(90deg, var(--purple), var(--pink), var(--cyan), var(--purple));
+    background-size:300% 100%;
+    animation:gradShift 5s ease infinite;
+    opacity:0.7;
+  }
+  .card:hover {
+    box-shadow:0 28px 80px rgba(0,0,0,0.65), 0 0 0 1px rgba(0,200,224,0.14),
+               0 0 55px rgba(107,33,168,0.15);
+  }
+
+  .thumb-wrap { position:relative; width:100%; aspect-ratio:16/9; overflow:hidden; }
+  .thumb {
+    width:100%; height:100%; object-fit:cover; display:block;
+    filter:brightness(0.86) saturate(1.1);
+    transition:transform 0.9s cubic-bezier(.25,.46,.45,.94);
+  }
+  .card:hover .thumb{transform:scale(1.04);}
+  .thumb-grad {
+    position:absolute; inset:0;
+    background:linear-gradient(to bottom,transparent 40%,rgba(10,7,24,0.98) 100%);
+  }
+  .thumb-tint {
+    position:absolute; inset:0;
+    background:linear-gradient(135deg,rgba(107,33,168,0.14),transparent 55%,rgba(0,200,224,0.09));
+    mix-blend-mode:screen;
+  }
+
+  /* Scan line sweep on thumb */
+  .thumb-scan {
+    position:absolute; inset:0; pointer-events:none; overflow:hidden;
+  }
+  .thumb-scan::after {
+    content:'';
+    position:absolute; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,transparent,rgba(0,200,224,0.3),transparent);
+    animation:scanLine 4s ease-in-out infinite;
+    opacity:0;
+  }
+  @keyframes scanLine {
+    0%   { top:-5px; opacity:0; }
+    5%   { opacity:1; }
+    95%  { opacity:0.5; }
+    100% { top:100%; opacity:0; }
+  }
+
+  .play-btn {
+    position:absolute; top:50%; left:50%;
+    transform:translate(-50%,-50%);
+    width:64px; height:64px; border-radius:50%;
+    background:rgba(255,255,255,0.1); backdrop-filter:blur(12px);
+    border:1.5px solid rgba(255,255,255,0.22);
+    display:flex; align-items:center; justify-content:center;
+    transition:all 0.3s;
+    animation:playPulse 3s ease-in-out infinite;
+  }
+  @keyframes playPulse {
+    0%,100%{box-shadow:0 0 0 0 rgba(0,200,224,0.25);}
+    50%{box-shadow:0 0 0 16px rgba(0,200,224,0);}
+  }
+  .play-btn::after {
+    content:''; width:0; height:0;
+    border-style:solid; border-width:11px 0 11px 20px;
+    border-color:transparent transparent transparent rgba(255,255,255,0.88);
+    margin-left:4px;
+  }
+  .card:hover .play-btn {
+    background:rgba(232,0,122,0.25); border-color:rgba(232,0,122,0.5);
+    transform:translate(-50%,-50%) scale(1.1);
+  }
+
+  .thumb-caption {
+    position:absolute; bottom:14px; left:18px;
+    font-size:12px; color:rgba(255,255,255,0.48);
+    max-width:65%; line-height:1.4;
+    text-shadow:0 1px 5px rgba(0,0,0,0.9);
+  }
+
+  /* Card body */
+  .card-body { padding:22px 26px 26px; }
+
+  .video-title {
+    font-family:'Orbitron',sans-serif;
+    font-size:clamp(14px,2.7vw,19px); font-weight:800; color:#fff;
+    margin-bottom:11px; letter-spacing:0.3px;
+  }
+  .video-title em{font-style:normal;color:var(--cyan);}
+
+  .badges{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px;}
+  .badge {
+    font-family:'Orbitron',sans-serif; font-size:9px;
+    letter-spacing:2px; padding:4px 12px; border-radius:100px;
+    font-weight:700; text-transform:uppercase;
+  }
+  .b-free{background:rgba(0,232,136,0.12);border:1px solid rgba(0,232,136,0.3);color:var(--green);}
+  .b-hd{background:rgba(0,200,224,0.1);border:1px solid rgba(0,200,224,0.28);color:var(--cyan);}
+
+  .divider {
+    height:1px;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.07),transparent);
+    margin-bottom:20px;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-group{display:flex;flex-direction:column;gap:11px;margin-bottom:14px;}
+
+  /* Download Now */
+  .btn-main {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    width:100%; padding:16px 30px; border-radius:11px; border:none; text-decoration:none;
+    font-family:'Orbitron',sans-serif; font-size:clamp(12px,2.3vw,15px);
+    font-weight:800; letter-spacing:2.5px; text-transform:uppercase; color:#fff;
+    position:relative; overflow:hidden; cursor:pointer;
+    transition:transform 0.25s, filter 0.25s;
+    background:linear-gradient(135deg,#c0006a 0%,#6b21a8 55%,#0e4b88 100%);
+    background-size:200% 200%; animation:btnGrad 8s ease infinite;
+    box-shadow:0 8px 30px rgba(192,0,106,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+  }
+  @keyframes btnGrad{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+  .btn-main:hover{transform:translateY(-3px);filter:brightness(1.13);}
+  .btn-main:active{transform:scale(0.98);}
+  .btn-main::after {
+    content:''; position:absolute;
+    top:0; left:-100%; width:55%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.12),transparent);
+    transform:skewX(-20deg); animation:shine 4.5s ease-in-out infinite;
+  }
+  @keyframes shine{0%,30%{left:-100%}60%{left:145%}100%{left:145%}}
+
+  /* Google Drive button — filled with Google colors */
+  .btn-drive {
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    width:100%; padding:15px 30px; border-radius:11px; border:none;
+    text-decoration:none; font-family:'Orbitron',sans-serif;
+    font-size:clamp(11px,2vw,13px); font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; color:#fff;
+    position:relative; overflow:hidden; cursor:pointer;
+    background:linear-gradient(135deg,#1a73e8 0%,#34a853 40%,#fbbc04 70%,#ea4335 100%);
+    background-size:250% 250%; animation:driveGrad 7s ease infinite;
+    box-shadow:0 8px 28px rgba(26,115,232,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+    transition:transform 0.25s, filter 0.25s;
+  }
+  @keyframes driveGrad{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+  .btn-drive:hover{transform:translateY(-3px);filter:brightness(1.1);}
+  .btn-drive:active{transform:scale(0.98);}
+  .btn-drive::after {
+    content:''; position:absolute;
+    top:0; left:-100%; width:55%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+    transform:skewX(-20deg); animation:shine 5s ease-in-out infinite;
+    animation-delay:1s;
+  }
+
+  /* Drive icon SVG-like */
+  .drive-logo {
+    display:inline-flex; align-items:center; justify-content:center;
+    width:20px; height:20px; border-radius:3px;
+    background:rgba(255,255,255,0.18); font-size:13px;
+  }
+
+  /* Mini note */
+  .mini-note {
+    text-align:center; font-size:11px; letter-spacing:1.5px;
+    color:rgba(255,255,255,0.24); font-family:'Orbitron',sans-serif; padding-top:3px;
+  }
+
+  /* ── FEATURES ── */
+  .features {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:11px;
+    width:100%; margin-top:30px; animation:fadeUp 1s 1.2s both;
+  }
+  .feat {
+    background:rgba(255,255,255,0.022);
+    border:1px solid rgba(255,255,255,0.055);
+    border-radius:11px; padding:18px 10px; text-align:center;
+    transition:all 0.4s; position:relative; overflow:hidden;
+  }
+  .feat::before {
+    content:''; position:absolute; top:0; left:0; right:0; height:1.5px;
+    background:linear-gradient(90deg,transparent,var(--cyan),transparent);
+    opacity:0; transition:opacity 0.3s;
+  }
+  .feat:hover{
+    background:rgba(255,255,255,0.05);
+    border-color:rgba(0,200,224,0.25);
+    transform:translateY(-5px);
+    box-shadow:0 12px 30px rgba(0,0,0,0.3);
+  }
+  .feat:hover::before{opacity:1;}
+  .feat-icon{font-size:24px;margin-bottom:8px;display:block;animation:iconFloat var(--fi,4s) ease-in-out infinite alternate;animation-delay:var(--fid,0s);}
+  @keyframes iconFloat{from{transform:translateY(0);}to{transform:translateY(-5px);}}
+  .feat h3{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:2px;color:var(--cyan);text-transform:uppercase;margin-bottom:3px;}
+  .feat p{font-size:10px;color:rgba(255,255,255,0.35);line-height:1.5;}
+
+  /* ── TELEGRAM BUTTON (below features) ── */
+  .tg-section {
+    width:100%; margin-top:20px;
+    animation:fadeUp 1s 1.4s both;
+  }
+
+  .btn-tg {
+    display:flex; align-items:center; justify-content:center; gap:12px;
+    width:100%; padding:17px 30px; border-radius:11px;
+    text-decoration:none; font-family:'Orbitron',sans-serif;
+    font-size:clamp(12px,2.2vw,14px); font-weight:800;
+    letter-spacing:2px; text-transform:uppercase; color:#fff;
+    position:relative; overflow:hidden; cursor:pointer;
+    background:linear-gradient(135deg,#0077b6 0%,#00b4d8 50%,#0077b6 100%);
+    background-size:200% 200%; animation:tgGrad 6s ease infinite;
+    box-shadow:0 10px 34px rgba(0,119,182,0.35), inset 0 1px 0 rgba(255,255,255,0.12);
+    border:none; transition:transform 0.25s, filter 0.25s;
+  }
+  @keyframes tgGrad{
+    0%,100%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+  }
+  .btn-tg:hover{transform:translateY(-3px) scale(1.01);filter:brightness(1.1);}
+  .btn-tg:active{transform:scale(0.98);}
+  .btn-tg::after {
+    content:''; position:absolute;
+    top:0; left:-100%; width:55%; height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);
+    transform:skewX(-20deg); animation:shine 5s ease-in-out 2s infinite;
+  }
+
+  /* Telegram pulse ring */
+  .tg-pulse {
+    position:relative; width:28px; height:28px;
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .tg-pulse::before {
+    content:'';
+    position:absolute; inset:-6px; border-radius:50%;
+    border:2px solid rgba(255,255,255,0.3);
+    animation:tgRing 2s ease-out infinite;
+  }
+  @keyframes tgRing{
+    from{transform:scale(0.7);opacity:0.8;}
+    to{transform:scale(1.6);opacity:0;}
+  }
+  .tg-icon{font-size:20px;position:relative;z-index:1;}
+
+  .tg-label {
+    display:flex; flex-direction:column; align-items:center; gap:1px;
+  }
+  .tg-label .main{font-size:clamp(12px,2.2vw,14px);letter-spacing:2px;}
+  .tg-label .sub{font-size:9px;letter-spacing:3px;opacity:0.6;font-weight:400;}
+
+  /* ── FOOTER ── */
+  .footer{margin-top:44px;text-align:center;animation:fadeUp 1s 1.6s both;}
+  .footer p{
+    font-family:'Orbitron',sans-serif; font-size:8px;
+    letter-spacing:4px; color:rgba(255,255,255,0.13); text-transform:uppercase;
+  }
+
+  @media(max-width:600px){
+    .features{grid-template-columns:repeat(2,1fr);}
+    .card-body{padding:16px 16px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+<div class="aurora">
+  <div class="ab ab1"></div><div class="ab ab2"></div>
+  <div class="ab ab3"></div><div class="ab ab4"></div>
+</div>
+<div class="grid"></div>
+<div class="stars" id="stars"></div>
+<div class="shoot" id="shoot"></div>
+<div class="particles" id="particles"></div>
+<div class="glitch-lines" id="glitch"></div>
+
+<div class="page">
+
+  <!-- LOGO -->
+  <div class="logo-section">
+    <div class="logo-wrap">
+      <div class="logo">FLIXHUB</div>
+      <span class="logo-badge">Join now</span>
+    </div>
+    <p class="tagline">Your Ultimate Free Entertainment Destination</p>
+    <p class="desc">Movies · Web Series · Popular Content · All Genres<br>Everything you love — not her/him</p>
+  </div>
+
+  <!-- MARQUEE -->
+  <div class="marquee-wrap">
+    <div class="marquee-inner">
+      <span>🎬 Latest Movies</span><span class="h">🔥 Trending</span>
+      <span>📺 Web Series</span><span>⚡ Fast Downloads</span>
+      <span>🎥 HD Quality</span><span class="h">💯 Ad Free</span>
+      <span>🌟 Premium Content</span><span class="h">✈ Join Telegram</span>
+      <span>🎬 Latest Movies</span><span class="h">🔥 Trending</span>
+      <span>📺 Web Series</span><span>⚡ Fast Downloads</span>
+      <span>🎥 HD Quality</span><span class="h">💯 Ad Free</span>
+      <span>🌟 Premium Content</span><span class="h">✈ Join Telegram</span>
+    </div>
+  </div>
+
+  <!-- SLOGAN -->
+  <div class="slogan">
+    <p><span class="hl">If buying isn’t owning, </span> — then piracy isn’t stealing.</p>
+  </div>
+
+  <!-- CARD -->
+  <div class="card-wrap">
+    <div class="card">
+      <div class="thumb-wrap">
+        <img class="thumb" src="https://imgs.search.brave.com/whu6QBgJCnh33nV6L71deXwUhlIn-4vxdOjGI6tJj-I/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWct/Y2RuLnB1YmxpdmUu/b25saW5lL2ZpdC1p/bi8xMjgweDk2MC9m/aWx0ZXJzOmZvcm1h/dCh3ZWJwKS9ib2xs/eXkvbWVkaWEvbWVk/aWFfZmlsZXMvMjAy/Ni8wMi8yNC9rYXBp/bC1zaGFybWEtc2hv/dy1raGFuLXNpci1u/aXRpbi12aWpheS1h/bmQtYWxha2gtcGFu/ZGV5LXRvLWFwcGVh/ci1hcy1ndWVzdHMt/MjAyNi0wMi0yNC0x/Ny0wMi0zOC5qcGVn" alt="Thumbnail">
+        <div class="thumb-grad"></div>
+        <div class="thumb-tint"></div>
+        <div class="thumb-scan"></div>
+        
+        <div class="thumb-caption">Kapil Sharma Show — Khan Sir, Nitin Vijay & Alakh Pandey</div>
+      </div>
+
+      <div class="card-body">
+        <div class="video-title">Kapil Sharma Show — <em>Special Episode</em></div>
+        <div class="badges">
+          <span class="badge b-free">✓ Free</span>
+          <span class="badge b-hd">HD</span>
+        </div>
+        <div class="divider"></div>
+
+        <div class="btn-group">
+          <!-- Download Now -->
+          <a class="btn-main" href="https://cdn.fsl-buckets.work/Movies4u.Foo.The.Great.Indian.Kapil.Show.S04E11.1080p.Hindi.WEB-DL.ESub.mkv?token=6c077811c5ffb9b9ffe5c618c38b03ef_154" target="_blank">
+            ⬇&nbsp;&nbsp;Download Now
+          </a>
+
+          <!-- Google Drive Download — filled Google colors -->
+          <a class="btn-drive" href="https://drive.google.com/file/d/19yWjUM7R17J_nVKxo_GAKK7XanWoP04Z/view?usp=sharing" target="_blank">
+            <span class="drive-logo">▲</span>&nbsp;Google Drive Link
+          </a>
+        </div>
+
+        <p class="mini-note">Piracy is FREE — if you pay, you are dumb ✦</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="features">
+    <div class="feat" style="--fi:4s;--fid:0s"><span class="feat-icon">🎬</span><h3>Movies</h3><p>Bollywood, Hollywood & more</p></div>
+    <div class="feat" style="--fi:5s;--fid:0.5s"><span class="feat-icon">📺</span><h3>Web Series</h3><p>Netflix, Prime & all OTTs</p></div>
+    <div class="feat" style="--fi:3.5s;--fid:1s"><span class="feat-icon">⚡</span><h3>Fast</h3><p>High-speed downloads</p></div>
+    <div class="feat" style="--fi:4.5s;--fid:1.5s"><span class="feat-icon">🎥</span><h3>HD Quality</h3><p>1080p & 4K available</p></div>
+  </div>
+
+  <!-- TELEGRAM — below features -->
+  <div class="tg-section">
+    <a class="btn-tg" href="https://t.me/+n3etNnm3RxI5NGZl" target="_blank">
+      <div class="tg-pulse"><span class="tg-icon">✈</span></div>
+      <div class="tg-label">
+        <span class="main">Join Now — More Content</span>
+        <span class="sub">Join our Telegram Channel</span>
+      </div>
+    </a>
+  </div>
+
+  <footer class="footer">
+    <p>Copyright 2026 FLIXHUB — Entertainment For Everyone</p>
+  </footer>
+
+</div>
+
+<script>
+  // Stars
+  const se = document.getElementById('stars');
+  for (let i = 0; i < 160; i++) {
+    const s = document.createElement('div'); s.className = 'star';
+    const z = Math.random() * 2.2 + 0.4;
+    s.style.cssText = `width:${z}px;height:${z}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${Math.random()*5+3}s;--dd:${Math.random()*9}s;`;
+    se.appendChild(s);
+  }
+
+  // Shooting stars
+  const sh = document.getElementById('shoot');
+  for (let i = 0; i < 6; i++) {
+    const s = document.createElement('div'); s.className = 'shoot-star';
+    const w = Math.random() * 120 + 60;
+    s.style.cssText = `width:${w}px;top:${Math.random()*50}%;left:${Math.random()*80}%;--dur:${Math.random()*8+6}s;--delay:${Math.random()*15}s;`;
+    sh.appendChild(s);
+  }
+
+  // Particles
+  const pe = document.getElementById('particles');
+  const cols = ['#e8007a','#6b21a8','#00c8e0','#00e888','#1a73e8'];
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div'); p.className = 'particle';
+    const z = Math.random() * 3.5 + 1.5, c = cols[i % cols.length];
+    p.style.cssText = `width:${z}px;height:${z}px;left:${Math.random()*100}%;background:${c};box-shadow:0 0 ${z*4}px ${c};--dur:${Math.random()*13+10}s;--delay:${Math.random()*13}s;`;
+    pe.appendChild(p);
+  }
+
+  // Glitch scan lines
+  const gl = document.getElementById('glitch');
+  for (let i = 0; i < 4; i++) {
+    const l = document.createElement('div'); l.className = 'glitch-line';
+    const startY = Math.random() * 60 + 10;
+    const travel = (Math.random() * 40 + 20);
+    l.style.cssText = `top:${startY}%;--dur:${Math.random()*6+7}s;--delay:${Math.random()*10}s;--travel:${travel}vh;`;
+    gl.appendChild(l);
+  }
+
+  // Subtle card tilt
+  const card = document.querySelector('.card');
+  document.addEventListener('mousemove', e => {
+    const cx = window.innerWidth/2, cy = window.innerHeight/2;
+    card.style.transform = `perspective(1200px) rotateY(${(e.clientX-cx)/cx*2.5}deg) rotateX(${-(e.clientY-cy)/cy*2.5}deg)`;
+  });
+  document.addEventListener('mouseleave', () => { card.style.transform = ''; });
+</script>
+</body>
+</html>
